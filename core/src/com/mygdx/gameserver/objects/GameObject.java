@@ -12,19 +12,12 @@ public abstract class GameObject {
 
     /**
      * Constructor for all objects on the screen.
-     * @param texture object texture.
      * @param x X-coordinate.
      * @param y Y-coordinate.
      * @param width object width.
      * @param height object height.
      */
-    public GameObject(Texture texture, float x, float y, float width, float height) {
-
-        // Create a Sprite with given texture
-        sprite = new Sprite(texture);
-        sprite.setSize(width, height); // resize the texture
-        sprite.setOrigin(width / 2f, height / 2f); // set texture center
-        sprite.setPosition(x - width / 2f, y - height / 2f); // set texture position
+    public GameObject(float x, float y, float width, float height) {
 
         // Create a Polygon with given vertices
         polygon = new Polygon(new float[]{0f, 0f, width, 0f, width, height, 0f, height});
