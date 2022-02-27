@@ -25,14 +25,4 @@ public abstract class GameObject {
         polygon.setPosition(x - width / 2f, y - height / 2f); // set polygon position
 
     }
-
-    /**
-     * Draw an object on the batch.
-     * @param batch batch.
-     */
-    public void draw(SpriteBatch batch) {
-        sprite.setPosition(polygon.getX(), polygon.getY()); // set Sprite position equal to Polygon position
-        sprite.setRotation(polygon.getRotation()); // set Sprite rotation around the Polygon center
-        sprite.draw(batch); // draw an object on the batch
-    }
 }
