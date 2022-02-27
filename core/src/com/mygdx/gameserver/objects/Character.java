@@ -6,7 +6,6 @@ public class Character {
     private int damage;
     private int maxHealth;
     private int currentHealth;
-
     private int speed;
 
     /**
