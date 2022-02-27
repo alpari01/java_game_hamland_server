@@ -1,8 +1,6 @@
 package com.mygdx.gameserver.objects;
 
-import com.badlogic.gdx.graphics.Texture;
-
-public class Character extends GameObject {
+public class Character {
 
     private final String name;
     private int damage;
@@ -11,18 +9,14 @@ public class Character extends GameObject {
     private int speed;
 
     /**
-     * Constructor for all objects on the screen.
+     * Constructor.
      *
-     * @param x         X-coordinate.
-     * @param y         Y-coordinate.
-     * @param width     object width.
-     * @param height    object height.
-     * @param damage    amount of damage character can deal to mobs (NPCs).
+     * @param name      name of the character
+     * @param damage    amount of damage character can deal to mobs (NPCs)
      * @param maxHealth maximum amount of HP character has.
      * @param speed     speed character moves with
      */
-    public Character(String name, float x, float y, float width, float height, int damage, int maxHealth, int speed) {
-        super(x, y, width, height);
+    public Character(String name, int damage, int maxHealth, int speed) {
         this.name = name;
         this.damage = damage;
         this.maxHealth = maxHealth;
