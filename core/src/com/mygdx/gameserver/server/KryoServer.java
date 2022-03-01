@@ -3,13 +3,18 @@ package com.mygdx.gameserver.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import com.mygdx.gameserver.objects.Player;
 import com.mygdx.gameserver.packets.PacketMessage;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class KryoServer extends Listener {
 
     static Server server;  // Server object.
+    private Map<String, Player> connectedPlayers = new HashMap<>();
 
     // Ports to listen on.
     static int udpPort = 27960;
@@ -32,6 +37,7 @@ public class KryoServer extends Listener {
         System.out.println("Server is up!");
     }
 
+    // Run this method when a client connects.
     public void connected(Connection c) {
         System.out.println("Received a connection from " + c.getRemoteAddressTCP().getHostString());
         PacketMessage packetMessage = new PacketMessage();
@@ -39,6 +45,7 @@ public class KryoServer extends Listener {
         c.sendTCP(packetMessage);
     }
 
+    // Run this method when a client disconnects.
     public void disconnected(Connection c) {
         System.out.println("A client disconnected.");
     }
