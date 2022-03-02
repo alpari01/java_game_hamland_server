@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.mygdx.gameserver.objects.Player;
+import com.mygdx.gameserver.packets.PacketCheckPlayerNicknameUnique;
 import com.mygdx.gameserver.packets.PacketMessage;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class KryoServer extends Listener {
 
         // Register packet classes. Server can only handle packets that are registered.
         server.getKryo().register(PacketMessage.class);
+        server.getKryo().register(PacketCheckPlayerNicknameUnique.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -47,6 +49,6 @@ public class KryoServer extends Listener {
 
     // Run this method when a client disconnects.
     public void disconnected(Connection c) {
-        System.out.println("A client disconnected.");
+        System.out.println("A client with IP " + c.getRemoteAddressTCP() + " has disconnected.");
     }
 }
