@@ -64,6 +64,17 @@ public class KryoServer extends Listener {
                 addPlayer(packet.playerNickname);
                 System.out.println("Client nickname is " + packet.playerNickname);
                 System.out.println(connectedPlayers);
+
+                // Notify user that his nickname is OK.
+                packet.isNicknameUnique = true;
+                c.sendTCP(packet);
+            }
+
+            // If this nickname already exists.
+            else {
+                System.out.println("Nickname already taken.");
+                packet.isNicknameUnique = false;
+                c.sendTCP(packet);
             }
         }
     }
