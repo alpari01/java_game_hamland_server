@@ -7,6 +7,7 @@ import com.mygdx.gameserver.objects.Player;
 import com.mygdx.gameserver.packets.PacketCheckPlayerNicknameUnique;
 import com.mygdx.gameserver.packets.PacketMessage;
 import com.mygdx.gameserver.packets.PacketSendPlayerMovement;
+import com.mygdx.gameserver.packets.PacketUpdatePlayers;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,7 +21,7 @@ public class KryoServer extends Listener {
 
     // Ports to listen on.
     static int udpPort = 27960;
-    static int tcpPort = 27960;
+    static int tcpPort = 27961;
 
     public static void main(String[] args) throws IOException {
         System.out.println("Creating the server...");
@@ -30,6 +31,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketMessage.class);
         server.getKryo().register(PacketCheckPlayerNicknameUnique.class);
         server.getKryo().register(PacketSendPlayerMovement.class);
+        server.getKryo().register(PacketUpdatePlayers.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
