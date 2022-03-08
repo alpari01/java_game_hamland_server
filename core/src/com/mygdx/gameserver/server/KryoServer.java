@@ -22,7 +22,7 @@ public class KryoServer extends Listener {
 
     // Ports to listen on.
     static int udpPort = 27960;
-    static int tcpPort = 27961;
+    static int tcpPort = 27960;
 
     public static void main(String[] args) throws IOException {
         System.out.println("Creating the server...");
