@@ -18,6 +18,7 @@ public class KryoServer extends Listener {
 
     static Server server;  // Server object.
     private Map<String, Player> connectedPlayers = new HashMap<>();
+    private Map<String, Connection> connections = new HashMap<>();
 
     // Ports to listen on.
     static int udpPort = 27960;
@@ -65,9 +66,12 @@ public class KryoServer extends Listener {
 
             // Check if this nickname is not already taken by other player.
             if (!connectedPlayers.containsKey(packet.playerNickname)) {
-                addPlayer(packet.playerNickname);
+                addPlayer(packet.playerNickname, c);
                 System.out.println("Client nickname is " + packet.playerNickname);
+
+                // DEBUG
                 System.out.println(connectedPlayers);
+                System.out.println(connections);
 
                 // Notify user that his nickname is OK.
                 packet.isNicknameUnique = true;
@@ -82,10 +86,27 @@ public class KryoServer extends Listener {
             }
         }
 
+        // If received this packet -> player has moved -> need to broadcast update packet.
         if (p instanceof PacketSendPlayerMovement) {
             PacketSendPlayerMovement packet = (PacketSendPlayerMovement) p;
 
-            System.out.println("Player " + packet.playerNickname + " moving " + packet.playerMovementDirection);
+            // Prepare a new update packet.
+            PacketUpdatePlayers updatePacket = new PacketUpdatePlayers();
+            updatePacket.playerNickname = packet.playerNickname;
+            Player playerToUpdate = connectedPlayers.get(packet.playerNickname);
+
+            updatePacket.playerPositionX = packet.playerCurrentPositionX;
+            updatePacket.playerPositionY = packet.playerCurrentPositionY;
+
+            // Broadcast update packet (so everyone knows this player's new position).
+            for (String nickname : connections.keySet()) {
+                Connection playerConnection = connections.get(nickname);
+                playerConnection.sendTCP(updatePacket);
+            }
+
+            // Update server players' data.
+            playerToUpdate.setX(packet.playerCurrentPositionX);
+            playerToUpdate.setY(packet.playerCurrentPositionY);
         }
     }
 
@@ -99,9 +120,10 @@ public class KryoServer extends Listener {
      *
      * @param playerNickname nickname of the player
      */
-    public void addPlayer(String playerNickname) {
+    public void addPlayer(String playerNickname, Connection playerConnection) {
         Player newPlayer = new Player(0, 0, 100, 100, null);
         connectedPlayers.put(playerNickname, newPlayer);
+        connections.put(playerNickname, playerConnection);
     }
 
     /**
