@@ -79,6 +79,12 @@ public class KryoServer extends Listener {
                 c.sendTCP(packet);
             }
         }
+
+        if (p instanceof PacketSendPlayerMovement) {
+            PacketSendPlayerMovement packet = (PacketSendPlayerMovement) p;
+
+            System.out.println("Player " + packet.playerNickname + " moving " + packet.playerMovementDirection);
+        }
     }
 
     // Run this method when a client disconnects.
