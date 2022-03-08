@@ -7,6 +7,7 @@ import com.mygdx.gameserver.objects.Player;
 import com.mygdx.gameserver.packets.PacketCheckPlayerNicknameUnique;
 import com.mygdx.gameserver.packets.PacketMessage;
 import com.mygdx.gameserver.packets.PacketSendPlayerMovement;
+import com.mygdx.gameserver.packets.PacketUpdatePlayers;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class KryoServer extends Listener {
 
     static Server server;  // Server object.
     private Map<String, Player> connectedPlayers = new HashMap<>();
+    private Map<String, Connection> connections = new HashMap<>();
 
     // Ports to listen on.
     static int udpPort = 27960;
@@ -30,6 +32,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketMessage.class);
         server.getKryo().register(PacketCheckPlayerNicknameUnique.class);
         server.getKryo().register(PacketSendPlayerMovement.class);
+        server.getKryo().register(PacketUpdatePlayers.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -63,9 +66,12 @@ public class KryoServer extends Listener {
 
             // Check if this nickname is not already taken by other player.
             if (!connectedPlayers.containsKey(packet.playerNickname)) {
-                addPlayer(packet.playerNickname);
+                addPlayer(packet.playerNickname, c);
                 System.out.println("Client nickname is " + packet.playerNickname);
+
+                // DEBUG
                 System.out.println(connectedPlayers);
+                System.out.println(connections);
 
                 // Notify user that his nickname is OK.
                 packet.isNicknameUnique = true;
@@ -80,10 +86,34 @@ public class KryoServer extends Listener {
             }
         }
 
+        // If received this packet -> player has moved -> need to broadcast update packet.
         if (p instanceof PacketSendPlayerMovement) {
             PacketSendPlayerMovement packet = (PacketSendPlayerMovement) p;
 
-            System.out.println("Player " + packet.playerNickname + " moving " + packet.playerMovementDirection);
+            // Prepare a new update packet.
+            PacketUpdatePlayers updatePacket = new PacketUpdatePlayers();
+            updatePacket.playerNickname = packet.playerNickname;
+            Player playerToUpdate = connectedPlayers.get(packet.playerNickname);
+
+            float newX = packet.playerCurrentPositionX;
+            float newY = packet.playerCurrentPositionY;
+            if (packet.playerMovementDirection.equals("up")) newY += 1;
+            if (packet.playerMovementDirection.equals("down")) newY -= 1;
+            if (packet.playerMovementDirection.equals("left")) newX -= 1;
+            if (packet.playerMovementDirection.equals("right")) newX += 1;
+
+            updatePacket.playerPositionX = newX;
+            updatePacket.playerPositionY = newY;
+
+            // Broadcast update packet.
+            for (String nickname : connections.keySet()) {
+                Connection playerConnection = connections.get(nickname);
+                playerConnection.sendTCP(updatePacket);
+            }
+
+            // Update server players' data.
+            playerToUpdate.setX(newX);
+            playerToUpdate.setY(newY);
         }
     }
 
@@ -97,9 +127,10 @@ public class KryoServer extends Listener {
      *
      * @param playerNickname nickname of the player
      */
-    public void addPlayer(String playerNickname) {
+    public void addPlayer(String playerNickname, Connection playerConnection) {
         Player newPlayer = new Player(0, 0, 100, 100, null);
         connectedPlayers.put(playerNickname, newPlayer);
+        connections.put(playerNickname, playerConnection);
     }
 
     /**
