@@ -95,25 +95,18 @@ public class KryoServer extends Listener {
             updatePacket.playerNickname = packet.playerNickname;
             Player playerToUpdate = connectedPlayers.get(packet.playerNickname);
 
-            float newX = packet.playerCurrentPositionX;
-            float newY = packet.playerCurrentPositionY;
-            if (packet.playerMovementDirection.equals("up")) newY += 1;
-            if (packet.playerMovementDirection.equals("down")) newY -= 1;
-            if (packet.playerMovementDirection.equals("left")) newX -= 1;
-            if (packet.playerMovementDirection.equals("right")) newX += 1;
+            updatePacket.playerPositionX = packet.playerCurrentPositionX;
+            updatePacket.playerPositionY = packet.playerCurrentPositionY;
 
-            updatePacket.playerPositionX = newX;
-            updatePacket.playerPositionY = newY;
-
-            // Broadcast update packet.
+            // Broadcast update packet (so everyone knows this player's new position).
             for (String nickname : connections.keySet()) {
                 Connection playerConnection = connections.get(nickname);
                 playerConnection.sendTCP(updatePacket);
             }
 
             // Update server players' data.
-            playerToUpdate.setX(newX);
-            playerToUpdate.setY(newY);
+            playerToUpdate.setX(packet.playerCurrentPositionX);
+            playerToUpdate.setY(packet.playerCurrentPositionY);
         }
     }
 
