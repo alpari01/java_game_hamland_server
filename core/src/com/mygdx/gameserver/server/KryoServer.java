@@ -6,6 +6,7 @@ import com.esotericsoftware.kryonet.Server;
 import com.mygdx.gameserver.objects.Player;
 import com.mygdx.gameserver.packets.PacketCheckPlayerNicknameUnique;
 import com.mygdx.gameserver.packets.PacketMessage;
+import com.mygdx.gameserver.packets.PacketSendPlayerMovement;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class KryoServer extends Listener {
         // Register packet classes. Server can only handle packets that are registered.
         server.getKryo().register(PacketMessage.class);
         server.getKryo().register(PacketCheckPlayerNicknameUnique.class);
+        server.getKryo().register(PacketSendPlayerMovement.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
