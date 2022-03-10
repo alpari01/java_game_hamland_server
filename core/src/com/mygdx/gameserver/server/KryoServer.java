@@ -97,6 +97,7 @@ public class KryoServer extends Listener {
 
             updatePacket.playerPositionX = packet.playerCurrentPositionX;
             updatePacket.playerPositionY = packet.playerCurrentPositionY;
+            updatePacket.playerRotation = packet.playerCurrentRotation;
 
             // Broadcast update packet (so everyone knows this player's new position).
             for (String nickname : connections.keySet()) {
@@ -107,6 +108,7 @@ public class KryoServer extends Listener {
             // Update server players' data.
             playerToUpdate.setX(packet.playerCurrentPositionX);
             playerToUpdate.setY(packet.playerCurrentPositionY);
+            playerToUpdate.setRotation(packet.playerCurrentRotation);
         }
     }
 
