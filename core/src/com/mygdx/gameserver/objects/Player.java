@@ -7,6 +7,7 @@ public class Player extends GameObject {
     private float y;
     private float width;
     private float height;
+    private float rotation;
 
     /**
      * Constructor for all objects on the screen.
@@ -25,6 +26,7 @@ public class Player extends GameObject {
         this.width = width;
         this.height = height;
         this.character = character;
+        this.rotation = 0;
     }
 
     public float getX() {
@@ -41,6 +43,14 @@ public class Player extends GameObject {
 
     public void setY(float newY) {
         y = newY;
+    }
+
+    public float getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(float newRotation) {
+        rotation = newRotation;
     }
 
     public float getWidth() {
