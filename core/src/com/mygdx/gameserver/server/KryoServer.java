@@ -4,10 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.mygdx.gameserver.objects.Player;
-import com.mygdx.gameserver.packets.PacketCheckPlayerNicknameUnique;
-import com.mygdx.gameserver.packets.PacketMessage;
-import com.mygdx.gameserver.packets.PacketSendPlayerMovement;
-import com.mygdx.gameserver.packets.PacketUpdatePlayers;
+import com.mygdx.gameserver.packets.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,6 +30,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketCheckPlayerNicknameUnique.class);
         server.getKryo().register(PacketSendPlayerMovement.class);
         server.getKryo().register(PacketUpdatePlayers.class);
+        server.getKryo().register(PacketRequestConnectedPlayers.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
