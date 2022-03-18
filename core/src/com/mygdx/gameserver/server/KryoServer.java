@@ -4,10 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.mygdx.gameserver.objects.Player;
-import com.mygdx.gameserver.packets.PacketCheckPlayerNicknameUnique;
-import com.mygdx.gameserver.packets.PacketMessage;
-import com.mygdx.gameserver.packets.PacketSendPlayerMovement;
-import com.mygdx.gameserver.packets.PacketUpdatePlayers;
+import com.mygdx.gameserver.packets.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,6 +30,9 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketCheckPlayerNicknameUnique.class);
         server.getKryo().register(PacketSendPlayerMovement.class);
         server.getKryo().register(PacketUpdatePlayers.class);
+        server.getKryo().register(PacketRequestConnectedPlayers.class);
+        server.getKryo().register(java.util.ArrayList.class);
+        server.getKryo().register(PacketPlayerConnected.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -110,6 +110,15 @@ public class KryoServer extends Listener {
             playerToUpdate.setY(packet.playerCurrentPositionY);
             playerToUpdate.setRotation(packet.playerCurrentRotation);
         }
+
+        // Packet respond with all currently connected players.
+        if (p instanceof PacketRequestConnectedPlayers) {
+            PacketRequestConnectedPlayers packet = (PacketRequestConnectedPlayers) p;
+
+            // Get all connected players.
+            packet.allPlayers.addAll(connectedPlayers.keySet());
+            c.sendTCP(packet);
+        }
     }
 
     // Run this method when a client disconnects.
@@ -139,5 +148,20 @@ public class KryoServer extends Listener {
         Player newPlayer = new Player(0, 0, 100, 100, null);
         connectedPlayers.put(playerNickname, newPlayer);
         connections.put(playerNickname, playerConnection);
+        broadcastPlayerConnected(playerNickname);
+    }
+
+    /**
+     * Broadcast packet with new connected players so other are notified of it.
+     */
+    public void broadcastPlayerConnected(String newConnectedPlayer) {
+        for (String connectedPlayer : connections.keySet()) {
+            if (!connectedPlayer.equals(newConnectedPlayer)) {
+                Connection connection = connections.get(connectedPlayer);
+                PacketPlayerConnected packetPlayerConnected = new PacketPlayerConnected();
+                packetPlayerConnected.teammateNickname = newConnectedPlayer;
+                connection.sendTCP(packetPlayerConnected);
+            }
+        }
     }
 }
