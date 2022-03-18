@@ -114,7 +114,20 @@ public class KryoServer extends Listener {
 
     // Run this method when a client disconnects.
     public void disconnected(Connection c) {
-        System.out.println("A client with IP " + c.getRemoteAddressTCP() + " has disconnected.");
+        String playerNicknameToRemove = null;
+        for (String nickname : connections.keySet()) {
+            // Search which player has disconnected.
+            if (connections.get(nickname).equals(c)) {
+                // Avoid modifying hashmap while iterating -> remove from player hashmaps after loop.
+                playerNicknameToRemove = nickname;  // Save player (his nickname) to be removed.
+                break;
+            }
+        } if (playerNicknameToRemove != null) {
+            // Remove the player from hashmaps.
+            connections.remove(playerNicknameToRemove);
+            connectedPlayers.remove(playerNicknameToRemove);
+            System.out.println("Player " + playerNicknameToRemove + " removed.");
+        }
     }
 
     /**
@@ -126,14 +139,5 @@ public class KryoServer extends Listener {
         Player newPlayer = new Player(0, 0, 100, 100, null);
         connectedPlayers.put(playerNickname, newPlayer);
         connections.put(playerNickname, playerConnection);
-    }
-
-    /**
-     * Remove player from connected players list.
-     *
-     * @param playerNickname nickname of the player to remove.
-     */
-    public void removePlayer(String playerNickname) {
-        connectedPlayers.remove(playerNickname);
     }
 }
