@@ -33,6 +33,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketRequestConnectedPlayers.class);
         server.getKryo().register(java.util.ArrayList.class);
         server.getKryo().register(PacketPlayerConnected.class);
+        server.getKryo().register(PacketPlayerDisconnected.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -135,6 +136,7 @@ public class KryoServer extends Listener {
             // Remove the player from hashmaps.
             connections.remove(playerNicknameToRemove);
             connectedPlayers.remove(playerNicknameToRemove);
+            broadcastPlayerDisconnected(playerNicknameToRemove);  // Inform other players who left the game.
             System.out.println("Player " + playerNicknameToRemove + " removed.");
         }
     }
@@ -161,6 +163,21 @@ public class KryoServer extends Listener {
                 PacketPlayerConnected packetPlayerConnected = new PacketPlayerConnected();
                 packetPlayerConnected.teammateNickname = newConnectedPlayer;
                 connection.sendTCP(packetPlayerConnected);
+            }
+        }
+    }
+
+    /**
+     * Broadcast this packet so other players know who has disconnected.
+     * @param disconnectedNickname nickname of the player who has disconnected.
+     */
+    public void broadcastPlayerDisconnected(String disconnectedNickname) {
+        for (String connectedPlayer : connections.keySet()) {
+            if (!connectedPlayer.equals(disconnectedNickname)) {
+                Connection connection = connections.get(connectedPlayer);
+                PacketPlayerDisconnected packetPlayerDisconnected = new PacketPlayerDisconnected();
+                packetPlayerDisconnected.disconnectedPlayerNickname = disconnectedNickname;
+                connection.sendTCP(packetPlayerDisconnected);
             }
         }
     }
