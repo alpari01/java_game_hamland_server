@@ -147,7 +147,6 @@ public class KryoServer extends Listener {
                 Connection connection = connections.get(connectedPlayer);
                 PacketPlayerConnected packetPlayerConnected = new PacketPlayerConnected();
                 packetPlayerConnected.teammateNickname = newConnectedPlayer;
-                System.out.println("Sending to " + connectedPlayer + " that " + packetPlayerConnected.teammateNickname + " has connected.");
                 connection.sendTCP(packetPlayerConnected);
             }
         }
