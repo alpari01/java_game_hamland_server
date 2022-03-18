@@ -32,6 +32,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketUpdatePlayers.class);
         server.getKryo().register(PacketRequestConnectedPlayers.class);
         server.getKryo().register(java.util.ArrayList.class);
+        server.getKryo().register(PacketPlayerConnected.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -134,14 +135,21 @@ public class KryoServer extends Listener {
         Player newPlayer = new Player(0, 0, 100, 100, null);
         connectedPlayers.put(playerNickname, newPlayer);
         connections.put(playerNickname, playerConnection);
+        broadcastPlayerConnected(playerNickname);
     }
 
     /**
-     * Remove player from connected players list.
-     *
-     * @param playerNickname nickname of the player to remove.
+     * Broadcast packet with new connected players so other are notified of it.
      */
-    public void removePlayer(String playerNickname) {
-        connectedPlayers.remove(playerNickname);
+    public void broadcastPlayerConnected(String newConnectedPlayer) {
+        for (String connectedPlayer : connections.keySet()) {
+            if (!connectedPlayer.equals(newConnectedPlayer)) {
+                Connection connection = connections.get(connectedPlayer);
+                PacketPlayerConnected packetPlayerConnected = new PacketPlayerConnected();
+                packetPlayerConnected.teammateNickname = newConnectedPlayer;
+                System.out.println("Sending to " + connectedPlayer + " that " + packetPlayerConnected.teammateNickname + " has connected.");
+                connection.sendTCP(packetPlayerConnected);
+            }
+        }
     }
 }
