@@ -31,6 +31,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketSendPlayerMovement.class);
         server.getKryo().register(PacketUpdatePlayers.class);
         server.getKryo().register(PacketRequestConnectedPlayers.class);
+        server.getKryo().register(java.util.ArrayList.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -107,6 +108,15 @@ public class KryoServer extends Listener {
             playerToUpdate.setX(packet.playerCurrentPositionX);
             playerToUpdate.setY(packet.playerCurrentPositionY);
             playerToUpdate.setRotation(packet.playerCurrentRotation);
+        }
+
+        // Packet respond with all currently connected players.
+        if (p instanceof PacketRequestConnectedPlayers) {
+            PacketRequestConnectedPlayers packet = (PacketRequestConnectedPlayers) p;
+
+            // Get all connected players.
+            packet.allPlayers.addAll(connectedPlayers.keySet());
+            c.sendTCP(packet);
         }
     }
 
