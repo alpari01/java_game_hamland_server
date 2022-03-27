@@ -65,6 +65,7 @@ public class KryoServer extends Listener {
         if (threadFlag) {
             serverUpdateThread = new ServerUpdateThread();
             serverUpdateThread.setKryoServer(this);
+            mobController.SpawnOctopus(1);
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
             threadFlag = false;
