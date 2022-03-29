@@ -15,7 +15,7 @@ public class ServerUpdateThread implements Runnable {
         while (true) {
 
             this.kryoServer.broadcastUpdateMobPacket();
-            System.out.println("broadcadsting");
+            this.kryoServer.mobsFollowPlayer();
 
             try {
                 sleep(5);
