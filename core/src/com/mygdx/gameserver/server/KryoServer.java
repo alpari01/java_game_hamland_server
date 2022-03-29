@@ -60,12 +60,17 @@ public class KryoServer extends Listener {
         threadFlag = true;
     }
 
+    public Map<String, Player> getConnectedPlayers() {
+        return connectedPlayers;
+    }
+
     // Run this method when a client connects.
     public void connected(Connection c) {
         if (threadFlag) {
             serverUpdateThread = new ServerUpdateThread();
             serverUpdateThread.setKryoServer(this);
-            mobController.SpawnOctopus(1);
+//            mobController.spawnOctopus(1);
+            mobController.spawnZombies(1);
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
             threadFlag = false;
@@ -220,7 +225,7 @@ public class KryoServer extends Listener {
             Enemy currentMob = mobController.getAllMobsSpawned().get(mobId);
             float[] mobData = new float[3];
             mobData[0] = currentMob.getX();
-            mobData[1] = currentMob.getX();
+            mobData[1] = currentMob.getY();
             if (currentMob.getType().equals("zombie")) {
                 mobData[2] = 0;
             } else if (currentMob.getType().equals("octopus")) {

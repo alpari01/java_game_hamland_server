@@ -13,7 +13,9 @@ public class ServerUpdateThread implements Runnable {
     @Override
     public void run() {
         while (true) {
+
             this.kryoServer.broadcastUpdateMobPacket();
+            System.out.println("broadcadsting");
 
             try {
                 sleep(5);
