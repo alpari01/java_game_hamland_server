@@ -47,6 +47,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketUpdateMobsPos.class);
         server.getKryo().register(java.util.HashMap.class);
         server.getKryo().register(float[].class);
+        server.getKryo().register(PacketBulletShot.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -152,6 +153,13 @@ public class KryoServer extends Listener {
             // Get all connected players.
             packet.allPlayers.addAll(connectedPlayers.keySet());
             c.sendTCP(packet);
+        }
+
+        // Receive this packet if any players shot a bullet.
+        if (p instanceof PacketBulletShot) {
+            PacketBulletShot packet = (PacketBulletShot) p;
+
+            System.out.println("Player: " + packet.playerWhoShot + " has shot, rotation: " + packet.bulletRotation);
         }
     }
 
