@@ -159,7 +159,13 @@ public class KryoServer extends Listener {
         if (p instanceof PacketBulletShot) {
             PacketBulletShot packet = (PacketBulletShot) p;
 
-            System.out.println("Player: " + packet.playerWhoShot + " has shot, rotation: " + packet.bulletRotation);
+            // Broadcast received packet to everyone except the sender so other players know who has shot the bullet.
+            for (String playerNickname : connections.keySet()) {
+                if (!playerNickname.equals(packet.playerWhoShot)) {
+                    Connection connection = connections.get(playerNickname);
+                    connection.sendTCP(packet);
+                }
+            }
         }
     }
 
