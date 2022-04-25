@@ -16,14 +16,14 @@ public class MobController {
 
     public void spawnZombies(int amount) {
         for (int i = 0; i < amount; i++) {
-            Enemy newMob = new Zombie(0, 0, 100, 100, 0.05, 5);
+            Enemy newMob = new Zombie(800, 1000, 100, 100, 0.25, 5);
             allMobsSpawned.put(newMob.getId(), newMob);
         }
     }
 
     public void spawnOctopus(int amount) {
         for (int i = 0; i < amount; i++) {
-            Enemy newMob = new Octopus(0, 0, 100, 100, 0.1, 5);
+            Enemy newMob = new Octopus(1200, 1000, 100, 100, 0.2, 5);
             allMobsSpawned.put(newMob.getId(), newMob);
         }
     }
@@ -34,21 +34,18 @@ public class MobController {
 
             // The mob will follow this player who is the nearest one.
             if (nearestPlayer != null) {
-                if (mob.getX() > nearestPlayer.getX()) {
-                    mob.setX((float) (mob.getX() - mob.getSpeed()));
-                }
+                double distance = Math.sqrt(Math.pow(mob.getX() - nearestPlayer.getX(), 2)
+                                          + Math.pow(mob.getX() - nearestPlayer.getX(), 2));
 
-                if (mob.getX() < nearestPlayer.getX()) {
-                    mob.setX((float) (mob.getX() + mob.getSpeed()));
-                }
+                double gradientX = (mob.getX() - nearestPlayer.getX()) / distance;
+                double gradientY = (mob.getY() - nearestPlayer.getY()) / distance;
 
-                if (mob.getY() > nearestPlayer.getY()) {
-                    mob.setY((float) (mob.getY() - mob.getSpeed()));
-                }
+                double vectorLength = Math.sqrt(Math.pow(gradientX, 2) + Math.pow(gradientY, 2));
+                double unitVectorX = gradientX / vectorLength;
+                double unitVectorY = gradientY / vectorLength;
 
-                if (mob.getY() < nearestPlayer.getY()) {
-                    mob.setY((float) (mob.getY() + mob.getSpeed()));
-                }
+                mob.setX((float) (mob.getX() - (unitVectorX * mob.getSpeed())));
+                mob.setY((float) (mob.getY() - (unitVectorY * mob.getSpeed())));
             }
         }
     }
