@@ -194,7 +194,7 @@ public class KryoServer extends Listener {
      * @param playerNickname nickname of the player
      */
     public void addPlayer(String playerNickname, Connection playerConnection) {
-        Player newPlayer = new Player(0, 0, 100, 100, null);
+        Player newPlayer = new Player(100, 100, 100, 100, null);
         connectedPlayers.put(playerNickname, newPlayer);
         connections.put(playerNickname, playerConnection);
         broadcastPlayerConnected(playerNickname);
