@@ -29,16 +29,20 @@ public class MobController {
     }
 
     public void mobsFollowPlayers() {
+
+        double gradientX = 0;
+        double gradientY = 0;
+
         for (Enemy mob : allMobsSpawned.values()) {
             Player nearestPlayer = getNearestPlayer(mob);  // Player to follow.
 
             // The mob will follow this player who is the nearest one.
             if (nearestPlayer != null) {
                 double distance = Math.sqrt(Math.pow(mob.getX() - nearestPlayer.getX(), 2)
-                                          + Math.pow(mob.getX() - nearestPlayer.getX(), 2));
+                                          + Math.pow(mob.getX() - nearestPlayer.getX(), 2)) + 0.00001;
 
-                double gradientX = (mob.getX() - nearestPlayer.getX()) / distance;
-                double gradientY = (mob.getY() - nearestPlayer.getY()) / distance;
+                gradientX = (mob.getX() - nearestPlayer.getX()) / distance;
+                gradientY = (mob.getY() - nearestPlayer.getY()) / distance;
 
                 double vectorLength = Math.sqrt(Math.pow(gradientX, 2) + Math.pow(gradientY, 2));
                 double unitVectorX = gradientX / vectorLength;
