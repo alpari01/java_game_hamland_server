@@ -28,6 +28,10 @@ public class MobController {
         }
     }
 
+    public void killMob(int mobId) {
+        this.allMobsSpawned.remove(mobId);
+    }
+
     public void mobsFollowPlayers() {
 
         double gradientX = 0;

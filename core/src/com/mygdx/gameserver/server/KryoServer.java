@@ -28,8 +28,10 @@ public class KryoServer extends Listener {
 
 
     // Ports to listen on.
-    static final int udpPort = 27960;
-    static final int tcpPort = 27960;
+//    static final int udpPort = 8080;
+//    static final int tcpPort = 8081;
+    static int tcpPort = 27960;
+    static int udpPort = 27960;
 
     public static void main(String[] args) throws IOException {
         System.out.println("Creating the server...");
@@ -48,6 +50,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(java.util.HashMap.class);
         server.getKryo().register(float[].class);
         server.getKryo().register(PacketBulletShot.class);
+        server.getKryo().register(PacketMobHit.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -167,6 +170,25 @@ public class KryoServer extends Listener {
                 }
             }
         }
+
+        // Receive this packet if any mob was hit by any player.
+        if (p instanceof PacketMobHit) {
+            PacketMobHit packet = (PacketMobHit) p;
+
+            // Update mob data stored on the server.
+            Enemy mob = this.mobController.getAllMobsSpawned().get(packet.mobId);
+            mob.setHp(mob.getHp() - 1);
+
+            // If mob hp is 0 -> remove this mob from the game.
+            if (mob.getHp() == 0) mobController.killMob(mob.getId());
+
+            System.out.println("Mob with ID: " + packet.mobId + " was hit. Now HP is: " + mob.getHp());
+
+            // Broadcast the received packet to other players so other players know which mob was hit.
+            for (Connection connection : connections.values()) {
+                connection.sendTCP(packet);
+            }
+        }
     }
 
     // Run this method when a client disconnects.
@@ -241,7 +263,7 @@ public class KryoServer extends Listener {
         Map<Integer, float[]> mobsPositions = new HashMap<>();
         for (int mobId : mobController.getAllMobsSpawned().keySet()) {
             Enemy currentMob = mobController.getAllMobsSpawned().get(mobId);
-            float[] mobData = new float[3];
+            float[] mobData = new float[4];
             mobData[0] = currentMob.getX();
             mobData[1] = currentMob.getY();
             if (currentMob.getType().equals("zombie")) {
@@ -249,15 +271,15 @@ public class KryoServer extends Listener {
             } else if (currentMob.getType().equals("octopus")) {
                 mobData[2] = 1;
             }
-
+            mobData[3] = currentMob.getHp();
             mobsPositions.put(mobId, mobData);
         }
 
-        PacketUpdateMobsPos packetUpdateMobs = new PacketUpdateMobsPos();
-        packetUpdateMobs.allEnemies = mobsPositions;
+        PacketUpdateMobsPos packetUpdateMobsPos = new PacketUpdateMobsPos();
+        packetUpdateMobsPos.allEnemies = mobsPositions;
         for (String connectedPlayer : connections.keySet()) {
             Connection connection = connections.get(connectedPlayer);
-            connection.sendUDP(packetUpdateMobs);
+            connection.sendUDP(packetUpdateMobsPos);
         }
     }
 }

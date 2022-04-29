@@ -53,4 +53,12 @@ public class Enemy {
     public double getSpeed() {
         return this.speed;
     }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
 }
