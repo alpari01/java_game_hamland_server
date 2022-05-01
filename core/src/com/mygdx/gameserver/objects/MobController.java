@@ -4,8 +4,17 @@ import com.mygdx.gameserver.server.KryoServer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MobController {
+
+    private final static int MOB_SPAWN_RADIUS = 100;
+
+    private final static double ZOMBIE_SPEED = 0.3;
+    private final static int ZOMBIE_HP = 3;
+
+    private final static double OCTOPUS_SPEED = 0.2;
+    private final static int OCTOPUS_HP = 5;
 
     private Map<Integer, Enemy> allMobsSpawned = new HashMap<>();
     private KryoServer server;
@@ -14,16 +23,36 @@ public class MobController {
         this.server = server;
     }
 
-    public void spawnZombies(int amount) {
-        for (int i = 0; i < amount; i++) {
-            Enemy newMob = new Zombie(800, 1000, 100, 100, 0.25, 5);
-            allMobsSpawned.put(newMob.getId(), newMob);
-        }
-    }
+    /**
+     * Spawn specified amount of mobs at specified location.
+     *
+     * @param mobType      mob type to spawn (e.g. "zombie", "octopus")
+     * @param amount       amount of mobs to spawn
+     * @param spawnPointX  initial spawn point coordinate x
+     * @param spawnPointY  initial spawn point coordinate y
+     */
+    public void spawnMob(String mobType, int amount, float spawnPointX, float spawnPointY) {
 
-    public void spawnOctopus(int amount) {
         for (int i = 0; i < amount; i++) {
-            Enemy newMob = new Octopus(1200, 1000, 100, 100, 0.2, 5);
+
+            Enemy newMob = null;
+
+            float randomNum = ThreadLocalRandom.current().nextInt(-MOB_SPAWN_RADIUS, MOB_SPAWN_RADIUS + 1);
+
+            float randomX = spawnPointX + randomNum;
+            float randomY = spawnPointY + randomNum;
+
+            switch (mobType) {
+
+                case "zombie": newMob = new Zombie(randomX, randomY,
+                        100, 100, ZOMBIE_SPEED, ZOMBIE_HP);
+                    break;
+
+                case "octopus": newMob = new Octopus(randomX, randomY,
+                        100, 100, OCTOPUS_SPEED, OCTOPUS_HP);
+                    break;
+            }
+
             allMobsSpawned.put(newMob.getId(), newMob);
         }
     }

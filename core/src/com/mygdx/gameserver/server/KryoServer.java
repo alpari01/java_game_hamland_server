@@ -75,10 +75,13 @@ public class KryoServer extends Listener {
     // Run this method when a client connects.
     public void connected(Connection c) {
         if (threadFlag) {
+
             serverUpdateThread = new ServerUpdateThread();
             serverUpdateThread.setKryoServer(this);
-            mobController.spawnOctopus(1);
-            mobController.spawnZombies(1);
+
+            mobController.spawnMob("zombie", 3, 1200, 1000);
+            mobController.spawnMob("octopus", 4, 800, 800);
+
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
             threadFlag = false;
@@ -182,7 +185,7 @@ public class KryoServer extends Listener {
             // If mob hp is 0 -> remove this mob from the game.
             if (mob.getHp() == 0) mobController.killMob(mob.getId());
 
-            System.out.println("Mob with ID: " + packet.mobId + " was hit. Now HP is: " + mob.getHp());
+//            System.out.println("Mob with ID: " + packet.mobId + " was hit. Now HP is: " + mob.getHp());
 
             // Broadcast the received packet to other players so other players know which mob was hit.
             for (Connection connection : connections.values()) {
