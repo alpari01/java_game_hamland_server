@@ -61,4 +61,12 @@ public class Enemy {
     public void setHp(int hp) {
         this.hp = hp;
     }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
+    }
 }

@@ -3,24 +3,45 @@ package com.mygdx.gameserver.objects;
 import com.mygdx.gameserver.server.KryoServer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MobController {
 
-    private final static int MOB_SPAWN_RADIUS = 100;
+    public static final float SIZES_CONSTANT = 0.065f;
 
-    private final static double ZOMBIE_SPEED = 0.3;
-    private final static int ZOMBIE_HP = 3;
+    public static final int ZOMBIE_WIDTH = (int) (694 * SIZES_CONSTANT);
+    public static final int ZOMBIE_HEIGHT = (int) (1167 * SIZES_CONSTANT);
 
-    private final static double OCTOPUS_SPEED = 0.2;
-    private final static int OCTOPUS_HP = 5;
+    public static final int OCTOPUS_WIDTH = (int) (923 * SIZES_CONSTANT);
+    public static final int OCTOPUS_HEIGHT = (int) (986 * SIZES_CONSTANT);
+
+    private static final int TIME_PLAYER_IS_IMMUNE = 3;
+
+    private static final int MOB_SPAWN_RADIUS = 100;
+
+    private static final double ZOMBIE_SPEED = 0.3;
+    private static final int ZOMBIE_HP = 3;
+
+    private static final double OCTOPUS_SPEED = 0.2;
+    private static final int OCTOPUS_HP = 5;
 
     private Map<Integer, Enemy> allMobsSpawned = new HashMap<>();
+    private Map<String, Player> players;
+    private Map<String, Long> playerTimers = new HashMap<>();
+    private Set<Player> deadPlayers = new HashSet<>();
     private KryoServer server;
+    private long serverStartTime = System.currentTimeMillis();
 
     public MobController(KryoServer server) {
         this.server = server;
+        this.players = this.server.getConnectedPlayers();
+
+        for (String playerNickname : players.keySet()) {
+            playerTimers.put(playerNickname, 0L);
+        }
     }
 
     /**
@@ -45,11 +66,11 @@ public class MobController {
             switch (mobType) {
 
                 case "zombie": newMob = new Zombie(randomX, randomY,
-                        100, 100, ZOMBIE_SPEED, ZOMBIE_HP);
+                        ZOMBIE_WIDTH, ZOMBIE_HEIGHT, ZOMBIE_SPEED, ZOMBIE_HP);
                     break;
 
                 case "octopus": newMob = new Octopus(randomX, randomY,
-                        100, 100, OCTOPUS_SPEED, OCTOPUS_HP);
+                        OCTOPUS_WIDTH, OCTOPUS_HEIGHT, OCTOPUS_SPEED, OCTOPUS_HP);
                     break;
             }
 
@@ -84,6 +105,9 @@ public class MobController {
                 mob.setX((float) (mob.getX() - (unitVectorX * mob.getSpeed())));
                 mob.setY((float) (mob.getY() - (unitVectorY * mob.getSpeed())));
             }
+
+            // Check if any mob's sprite intercepts any player's sprite.
+            this.checkSpritesCollision(mob);
         }
     }
 
@@ -93,16 +117,66 @@ public class MobController {
         float distanceToPlayerPrev = 99999;
 
         for (Player player : server.getConnectedPlayers().values()) {
-            distanceToPlayer = (float) Math.sqrt(Math.pow(player.getX() - mob.getX(), 2) +
-                    Math.pow(player.getY() - mob.getY(), 2));
 
-            if (distanceToPlayer < distanceToPlayerPrev) {
-                distanceToPlayerPrev = distanceToPlayer;
-                nearestPlayer = player;
+            if (!this.deadPlayers.contains(player)) {
+                distanceToPlayer = (float) Math.sqrt(Math.pow(player.getX() - mob.getX(), 2) +
+                        Math.pow(player.getY() - mob.getY(), 2));
+
+                if (distanceToPlayer < distanceToPlayerPrev) {
+                    distanceToPlayerPrev = distanceToPlayer;
+                    nearestPlayer = player;
+                }
             }
         }
-
         return nearestPlayer;
+    }
+
+    /**
+     * Check if mob's sprite intercepts any player's sprite.
+     */
+    public void checkSpritesCollision(Enemy mob) {
+
+        long delta = -(serverStartTime - System.currentTimeMillis()) / 1000;
+
+        for (String playerNickname : players.keySet()) {
+            // Check collision with each player on the server.
+            Player player = players.get(playerNickname);
+
+            if (!this.deadPlayers.contains(player) && !player.isImmune()) {
+                // If player is not immune.
+                if (((mob.getX() <= player.getX() && player.getX() <= mob.getX() + mob.getWidth())
+                        && (mob.getY() <= player.getY() && player.getY() <= mob.getY() + mob.getHeight()))
+                        || ((mob.getX() <= player.getX() + player.getWidth() && player.getX() + player.getWidth() <= mob.getX() + mob.getWidth())
+                        && (mob.getY() <= player.getY() && player.getY() <= mob.getY() + mob.getHeight()))
+                        || ((mob.getX() <= player.getX() + player.getWidth() && player.getX() + player.getWidth() <= mob.getX() + mob.getWidth())
+                        && (mob.getY() <= player.getY() + player.getHeight() && player.getY() + player.getHeight() <= mob.getY() + mob.getHeight()))
+                        || ((mob.getX() <= player.getX() && player.getX() <= mob.getX() + mob.getWidth())
+                        && (mob.getY() <= player.getY() + player.getHeight() && player.getY() + player.getHeight() <= mob.getY() + mob.getHeight()))) {
+                    // If player is hit by a mob -> decrease player's hp.
+
+                    player.setHp(player.getHp() - 1);
+                    // Player become immune for specified amount of time.
+                    player.setIsImmune(true);
+                    // Reset the previous timer.
+                    this.playerTimers.put(playerNickname, delta);
+
+                    System.out.println("Player is hit, hp is now " + player.getHp());
+                    this.server.broadcastPlayerHitPacket(playerNickname);
+                }
+            }
+
+            else {
+                // If player was hit by an enemy -> the player remains immune for specified amount of time.
+                if (delta - playerTimers.get(playerNickname) >= TIME_PLAYER_IS_IMMUNE) {
+                    // Player stops being immune.
+                    player.setIsImmune(false);
+                }
+            }
+
+            if (player.getHp() == 0) {
+                this.deadPlayers.add(player);
+            }
+        }
     }
 
     public Map<Integer, Enemy> getAllMobsSpawned() {
