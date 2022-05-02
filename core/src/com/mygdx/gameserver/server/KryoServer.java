@@ -18,6 +18,11 @@ public class KryoServer extends Listener {
     static Server server;  // Server object.
     private static boolean threadFlag = false;
 
+    public static final float SIZES_CONSTANT = 0.065f;
+
+    public static final int PLAYER_WIDTH = (int) (771 * SIZES_CONSTANT);
+    public static final int PLAYER_HEIGHT = (int) (1054 * SIZES_CONSTANT);
+
     // Players (clients) data.
     private Map<String, Player> connectedPlayers = new HashMap<>();
     private Map<String, Connection> connections = new HashMap<>();
@@ -51,6 +56,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(float[].class);
         server.getKryo().register(PacketBulletShot.class);
         server.getKryo().register(PacketMobHit.class);
+        server.getKryo().register(PacketPlayerHit.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -219,7 +225,7 @@ public class KryoServer extends Listener {
      * @param playerNickname nickname of the player
      */
     public void addPlayer(String playerNickname, Connection playerConnection) {
-        Player newPlayer = new Player(100, 100, 100, 100, null);
+        Player newPlayer = new Player(100, 100, PLAYER_WIDTH, PLAYER_HEIGHT);
         connectedPlayers.put(playerNickname, newPlayer);
         connections.put(playerNickname, playerConnection);
         broadcastPlayerConnected(playerNickname);
@@ -283,6 +289,19 @@ public class KryoServer extends Listener {
         for (String connectedPlayer : connections.keySet()) {
             Connection connection = connections.get(connectedPlayer);
             connection.sendUDP(packetUpdateMobsPos);
+        }
+    }
+
+    // Broadcast this packet to everyone to notify that certain player was hit by a mob.
+    public void broadcastPlayerHitPacket(String playerNickname) {
+
+        PacketPlayerHit packetPlayerHit = new PacketPlayerHit();
+        packetPlayerHit.playerNickname = playerNickname;
+
+        for (String connectedPlayer : connections.keySet()) {
+            // Send this packet to everyone.
+            Connection connection = connections.get(connectedPlayer);
+            connection.sendTCP(packetPlayerHit);
         }
     }
 }
