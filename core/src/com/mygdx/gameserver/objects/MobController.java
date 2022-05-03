@@ -12,11 +12,16 @@ public class MobController {
 
     public static final float SIZES_CONSTANT = 0.065f;
 
-    public static final int ZOMBIE_WIDTH = (int) (694 * SIZES_CONSTANT);
-    public static final int ZOMBIE_HEIGHT = (int) (1167 * SIZES_CONSTANT);
-
-    public static final int OCTOPUS_WIDTH = (int) (923 * SIZES_CONSTANT);
-    public static final int OCTOPUS_HEIGHT = (int) (986 * SIZES_CONSTANT);
+    private static final int ZOMBIE_WIDTH = (int) (694 * SIZES_CONSTANT);
+    private static final int ZOMBIE_HEIGHT = (int) (1167 * SIZES_CONSTANT);
+    private static final int OCTOPUS_WIDTH = (int) (923 * SIZES_CONSTANT);
+    private static final int OCTOPUS_HEIGHT = (int) (986 * SIZES_CONSTANT);
+    private static final int CRAB_WIDTH = (int) (824 * SIZES_CONSTANT);
+    private static final int CRAB_HEIGHT = (int) (550 * SIZES_CONSTANT);
+    private static final int BLUEGUY_WIDTH = (int) (562 * SIZES_CONSTANT);
+    private static final int BLUEGUY_HEIGHT = (int) (776 * SIZES_CONSTANT);
+    private static final int GREENGUY_WIDTH = (int) (887 * SIZES_CONSTANT);
+    private static final int GREENGUY_HEIGHT = (int) (726 * SIZES_CONSTANT);
 
     private static final int TIME_PLAYER_IS_IMMUNE = 3;
 
@@ -24,9 +29,14 @@ public class MobController {
 
     private static final double ZOMBIE_SPEED = 0.3;
     private static final int ZOMBIE_HP = 3;
-
     private static final double OCTOPUS_SPEED = 0.2;
     private static final int OCTOPUS_HP = 5;
+    private static final double CRAB_SPEED = 0.1;
+    private static final int CRAB_HP = 6;
+    private static final double BLUEGUY_SPEED = 0.8;
+    private static final int BLUEGUY_HP = 1;
+    private static final double GREENGUY_SPEED = 0.05;
+    private static final int GREENGUY_HP = 100;
 
     private Map<Integer, Enemy> allMobsSpawned = new HashMap<>();
     private Map<String, Player> players;
@@ -71,6 +81,18 @@ public class MobController {
 
                 case "octopus": newMob = new Octopus(randomX, randomY,
                         OCTOPUS_WIDTH, OCTOPUS_HEIGHT, OCTOPUS_SPEED, OCTOPUS_HP);
+                    break;
+
+                case "crab": newMob = new Crab(randomX, randomY,
+                        CRAB_WIDTH, CRAB_HEIGHT, CRAB_SPEED, CRAB_HP);
+                    break;
+
+                case "blueguy": newMob = new BlueGuy(randomX, randomY,
+                        BLUEGUY_WIDTH, BLUEGUY_HEIGHT, BLUEGUY_SPEED, BLUEGUY_HP);
+                    break;
+
+                case "greenguy": newMob = new GreenGuy(randomX, randomY,
+                        GREENGUY_WIDTH, GREENGUY_HEIGHT, GREENGUY_SPEED, GREENGUY_HP);
                     break;
             }
 
