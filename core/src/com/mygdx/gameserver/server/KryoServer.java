@@ -85,8 +85,11 @@ public class KryoServer extends Listener {
             serverUpdateThread = new ServerUpdateThread();
             serverUpdateThread.setKryoServer(this);
 
-            mobController.spawnMob("zombie", 3, 1200, 1000);
-            mobController.spawnMob("octopus", 4, 800, 800);
+            mobController.spawnMob("zombie", 1, 1200, 1000);
+            mobController.spawnMob("octopus", 1, 800, 800);
+            mobController.spawnMob("crab", 1, 1200, 1200);
+            mobController.spawnMob("blueguy", 1, 700, 700);
+            mobController.spawnMob("greenguy", 1, 800, 500);
 
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
@@ -275,10 +278,17 @@ public class KryoServer extends Listener {
             float[] mobData = new float[4];
             mobData[0] = currentMob.getX();
             mobData[1] = currentMob.getY();
+
             if (currentMob.getType().equals("zombie")) {
                 mobData[2] = 0;
             } else if (currentMob.getType().equals("octopus")) {
                 mobData[2] = 1;
+            } else if (currentMob.getType().equals("crab")) {
+                mobData[2] = 2;
+            } else if (currentMob.getType().equals("blueguy")) {
+                mobData[2] = 3;
+            } else if (currentMob.getType().equals("greenguy")) {
+                mobData[2] = 4;
             }
             mobData[3] = currentMob.getHp();
             mobsPositions.put(mobId, mobData);
