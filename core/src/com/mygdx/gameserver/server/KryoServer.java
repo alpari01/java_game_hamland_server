@@ -59,6 +59,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketMobHit.class);
         server.getKryo().register(PacketPlayerHit.class);
         server.getKryo().register(PacketPlayerReady.class);
+        server.getKryo().register(PacketGameBeginTimer.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -74,6 +75,10 @@ public class KryoServer extends Listener {
 
     public Map<String, Player> getConnectedPlayers() {
         return connectedPlayers;
+    }
+
+    public Map<String, Boolean> getPlayersReady() {
+        return this.playersReady;
     }
 
     public void mobsFollowPlayer() {
@@ -232,6 +237,7 @@ public class KryoServer extends Listener {
             // Remove the player from hashmaps.
             connections.remove(playerNicknameToRemove);
             connectedPlayers.remove(playerNicknameToRemove);
+            playersReady.remove(playerNicknameToRemove);
             broadcastPlayerDisconnected(playerNicknameToRemove);  // Inform other players who left the game.
             System.out.println("Player " + playerNicknameToRemove + " removed.");
         }
@@ -246,6 +252,7 @@ public class KryoServer extends Listener {
         Player newPlayer = new Player(100, 100, PLAYER_WIDTH, PLAYER_HEIGHT);
         connectedPlayers.put(playerNickname, newPlayer);
         connections.put(playerNickname, playerConnection);
+        playersReady.put(playerNickname, false);
         broadcastPlayerConnected(playerNickname);
     }
 
@@ -343,6 +350,17 @@ public class KryoServer extends Listener {
                 Connection connection = connections.get(connectedPlayer);
                 connection.sendTCP(packetPlayerReady);
             }
+        }
+    }
+
+    public void broadcastPacketGameBeginTimer(int timerValueCurrent, int timerStopValue) {
+        PacketGameBeginTimer packetGameBeginTimer = new PacketGameBeginTimer();
+        packetGameBeginTimer.timerValueCurrent = timerValueCurrent;
+        packetGameBeginTimer.timerStopValue = timerStopValue + 1;
+
+        for (String connectedPlayer : connections.keySet()) {
+            Connection connection = connections.get(connectedPlayer);
+            connection.sendTCP(packetGameBeginTimer);
         }
     }
 }
