@@ -26,6 +26,7 @@ public class KryoServer extends Listener {
     // Players (clients) data.
     private Map<String, Player> connectedPlayers = new HashMap<>();
     private Map<String, Connection> connections = new HashMap<>();
+    private Map<String, Boolean> playersReady = new HashMap<>();
 
     // Mobs.
     private final MobController mobController = new MobController(this);
@@ -57,6 +58,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketBulletShot.class);
         server.getKryo().register(PacketMobHit.class);
         server.getKryo().register(PacketPlayerHit.class);
+        server.getKryo().register(PacketPlayerReady.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -85,11 +87,11 @@ public class KryoServer extends Listener {
             serverUpdateThread = new ServerUpdateThread();
             serverUpdateThread.setKryoServer(this);
 
-            mobController.spawnMob("zombie", 1, 1200, 1000);
-            mobController.spawnMob("octopus", 1, 800, 800);
-            mobController.spawnMob("crab", 1, 1200, 1200);
-            mobController.spawnMob("blueguy", 1, 700, 700);
-            mobController.spawnMob("greenguy", 1, 800, 500);
+//            mobController.spawnMob("zombie", 1, 1200, 1000);
+//            mobController.spawnMob("octopus", 1, 800, 800);
+//            mobController.spawnMob("crab", 1, 1200, 1200);
+//            mobController.spawnMob("blueguy", 1, 700, 700);
+//            mobController.spawnMob("greenguy", 1, 800, 500);
 
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
@@ -200,6 +202,19 @@ public class KryoServer extends Listener {
             for (Connection connection : connections.values()) {
                 connection.sendTCP(packet);
             }
+        }
+
+        // Receive this packet when any player has pressed the "Ready" button.
+        if (p instanceof PacketPlayerReady) {
+            PacketPlayerReady packet = (PacketPlayerReady) p;
+
+            // Update players' readiness in server's hashmap.
+            this.playersReady.put(packet.playerNickname, packet.isPlayerReady);
+
+            // Resend this packet to other player (except the sender), so other players are notified which
+            // teammate has pressed the "Ready" button.
+            broadCastPlayerReadyPacket(packet.playerNickname, packet.isPlayerReady);
+            System.out.println(this.playersReady);
         }
     }
 
@@ -312,6 +327,22 @@ public class KryoServer extends Listener {
             // Send this packet to everyone.
             Connection connection = connections.get(connectedPlayer);
             connection.sendTCP(packetPlayerHit);
+        }
+    }
+
+    public void broadCastPlayerReadyPacket(String playerNickname, boolean isPlayerReady) {
+
+        PacketPlayerReady packetPlayerReady = new PacketPlayerReady();
+        packetPlayerReady.playerNickname = playerNickname;
+        packetPlayerReady.isPlayerReady = isPlayerReady;
+
+        for (String connectedPlayer : connections.keySet()) {
+
+            if (!connectedPlayer.equals(playerNickname)) {
+                // Do not send this packet back to the sender.
+                Connection connection = connections.get(connectedPlayer);
+                connection.sendTCP(packetPlayerReady);
+            }
         }
     }
 }
