@@ -4,6 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.mygdx.gameserver.objects.Enemy;
+import com.mygdx.gameserver.objects.LevelController;
 import com.mygdx.gameserver.objects.MobController;
 import com.mygdx.gameserver.objects.Player;
 import com.mygdx.gameserver.packets.*;
@@ -29,7 +30,8 @@ public class KryoServer extends Listener {
     private Map<String, Boolean> playersReady = new HashMap<>();
 
     // Mobs.
-    private final MobController mobController = new MobController(this);
+//    private final MobController mobController = new MobController(this);
+    private final LevelController levelController = new LevelController(this);
     private static ServerUpdateThread serverUpdateThread;
 
 
@@ -82,7 +84,9 @@ public class KryoServer extends Listener {
     }
 
     public void mobsFollowPlayer() {
-        mobController.mobsFollowPlayers();
+//        mobController.mobsFollowPlayers();
+        this.levelController.beginNextWave();
+        this.levelController.getMobController().mobsFollowPlayers();
     }
 
     // Run this method when a client connects.
@@ -97,6 +101,8 @@ public class KryoServer extends Listener {
 //            mobController.spawnMob("crab", 1, 1200, 1200);
 //            mobController.spawnMob("blueguy", 1, 700, 700);
 //            mobController.spawnMob("greenguy", 1, 800, 500);
+
+//            this.levelController.getMobController().spawnMob("zombie", 2, 1200, 1000);
 
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
@@ -195,11 +201,13 @@ public class KryoServer extends Listener {
             PacketMobHit packet = (PacketMobHit) p;
 
             // Update mob data stored on the server.
-            Enemy mob = this.mobController.getAllMobsSpawned().get(packet.mobId);
+//            Enemy mob = this.mobController.getAllMobsSpawned().get(packet.mobId);
+            Enemy mob = this.levelController.getMobController().getAllMobsSpawned().get(packet.mobId);
             mob.setHp(mob.getHp() - 1);
 
             // If mob hp is 0 -> remove this mob from the game.
-            if (mob.getHp() == 0) mobController.killMob(mob.getId());
+//            if (mob.getHp() == 0) mobController.killMob(mob.getId());
+            if (mob.getHp() == 0) this.levelController.getMobController().killMob(mob.getId());
 
 //            System.out.println("Mob with ID: " + packet.mobId + " was hit. Now HP is: " + mob.getHp());
 
@@ -295,8 +303,10 @@ public class KryoServer extends Listener {
     public void broadcastUpdateMobPacket() {
         // Collect all mobs positions.
         Map<Integer, float[]> mobsPositions = new HashMap<>();
-        for (int mobId : mobController.getAllMobsSpawned().keySet()) {
-            Enemy currentMob = mobController.getAllMobsSpawned().get(mobId);
+//        for (int mobId : mobController.getAllMobsSpawned().keySet()) {
+        for (int mobId : this.levelController.getMobController().getAllMobsSpawned().keySet()) {
+//            Enemy currentMob = mobController.getAllMobsSpawned().get(mobId);
+            Enemy currentMob = this.levelController.getMobController().getAllMobsSpawned().get(mobId);
             float[] mobData = new float[4];
             mobData[0] = currentMob.getX();
             mobData[1] = currentMob.getY();
