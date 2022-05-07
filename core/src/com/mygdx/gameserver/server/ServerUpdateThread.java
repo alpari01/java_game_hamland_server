@@ -28,46 +28,49 @@ public class ServerUpdateThread implements Runnable {
     public void run() {
         while (true) {
 
-            // Update the data about players' readiness.
-            this.playersReady = this.kryoServer.getPlayersReady();
-            this.allPlayersReady = this.checkAllPlayersReady();
-
-            if (this.kryoServer.getConnectedPlayers().size() == 0) {
-                // Stop the game when all players have disconnected.
-//                System.out.println("game not start");
-                this.startTheGame = false;
-                delta = 0;
-                this.kryoServer.broadcastPacketGameBeginTimer((int) delta, TIMER_GAME_BEGIN);
-                this.playersReady = this.kryoServer.getPlayersReady();  // Refresh the local hashmap.
-            }
-
-            if (this.allPlayersReady && !this.startTheGame) {
-                // Start the timer.
-                delta = -(timerStartTime - System.currentTimeMillis()) / 1000;
-                this.kryoServer.broadcastPacketGameBeginTimer((int) delta, TIMER_GAME_BEGIN);
-                if (delta >= TIMER_GAME_BEGIN + 1) {
-                    this.startTheGame = true;
-                    System.out.println("game start");
-                }
-            }
-            else {
-                // If any of the players is not ready again -> reset the timer.
-                this.timerStartTime = System.currentTimeMillis();
-                delta = 0;
-                this.kryoServer.broadcastPacketGameBeginTimer((int) delta, TIMER_GAME_BEGIN);
-            }
-
-            if (this.startTheGame) {
-                // When timer is up -> start the game (make mobs move).
-                this.kryoServer.broadcastUpdateMobPacket();
-                this.kryoServer.mobsFollowPlayer();
-            }
+            this.updateGameBeginTimer();
 
             try {
                 sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void updateGameBeginTimer() {
+        // Update the data about players' readiness.
+        this.playersReady = this.kryoServer.getPlayersReady();
+        this.allPlayersReady = this.checkAllPlayersReady();
+
+        if (this.kryoServer.getConnectedPlayers().size() == 0) {
+            // Stop the game when all players have disconnected.
+            this.startTheGame = false;
+            delta = 0;
+            this.kryoServer.broadcastPacketGameBeginTimer((int) delta, TIMER_GAME_BEGIN);
+            this.playersReady = this.kryoServer.getPlayersReady();  // Refresh the local hashmap.
+        }
+
+        if (this.allPlayersReady && !this.startTheGame) {
+            // Start the timer.
+            delta = -(timerStartTime - System.currentTimeMillis()) / 1000;
+            this.kryoServer.broadcastPacketGameBeginTimer((int) delta, TIMER_GAME_BEGIN);
+            if (delta >= TIMER_GAME_BEGIN + 1) {
+                this.startTheGame = true;
+                System.out.println("game start");
+            }
+        }
+        else {
+            // If any of the players is not ready again -> reset the timer.
+            this.timerStartTime = System.currentTimeMillis();
+            delta = 0;
+            this.kryoServer.broadcastPacketGameBeginTimer((int) delta, TIMER_GAME_BEGIN);
+        }
+
+        if (this.startTheGame) {
+            // When timer is up -> start the game (make mobs move).
+            this.kryoServer.broadcastUpdateMobPacket();
+            this.kryoServer.mobsFollowPlayer();
         }
     }
 
