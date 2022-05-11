@@ -49,7 +49,6 @@ public class Statistics {
 
     public String getAllStatisticsAsString() {
         List<String> statisticsList = new LinkedList<>();
-        statisticsList.add("Player:" + "         " + "Score:");
 
         for (String playerNickname : this.playerPoints.keySet()) {
             int playerScore = this.playerPoints.get(playerNickname);
