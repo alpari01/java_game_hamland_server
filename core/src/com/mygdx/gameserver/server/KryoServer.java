@@ -3,10 +3,7 @@ package com.mygdx.gameserver.server;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
-import com.mygdx.gameserver.objects.Enemy;
-import com.mygdx.gameserver.objects.LevelController;
-import com.mygdx.gameserver.objects.MobController;
-import com.mygdx.gameserver.objects.Player;
+import com.mygdx.gameserver.objects.*;
 import com.mygdx.gameserver.packets.*;
 
 import java.io.IOException;
@@ -23,6 +20,7 @@ public class KryoServer extends Listener {
 
     public static final int PLAYER_WIDTH = (int) (771 * SIZES_CONSTANT);
     public static final int PLAYER_HEIGHT = (int) (1054 * SIZES_CONSTANT);
+    public static final int MED_KIT_HP_HEAL_AMOUNT = 3;  //NB! If changing this value also change it on the client!!!
 
     // Players (clients) data.
     private Map<String, Player> connectedPlayers = new HashMap<>();
@@ -62,6 +60,8 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketPlayerHit.class);
         server.getKryo().register(PacketPlayerReady.class);
         server.getKryo().register(PacketGameBeginTimer.class);
+        server.getKryo().register(PacketLootSpawn.class);
+        server.getKryo().register(PacketLootCollected.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -201,13 +201,14 @@ public class KryoServer extends Listener {
             PacketMobHit packet = (PacketMobHit) p;
 
             // Update mob data stored on the server.
-//            Enemy mob = this.mobController.getAllMobsSpawned().get(packet.mobId);
             Enemy mob = this.levelController.getMobController().getAllMobsSpawned().get(packet.mobId);
             mob.setHp(mob.getHp() - 1);
 
             // If mob hp is 0 -> remove this mob from the game.
-//            if (mob.getHp() == 0) mobController.killMob(mob.getId());
-            if (mob.getHp() == 0) this.levelController.getMobController().killMob(mob.getId());
+            if (mob.getHp() == 0) {
+                this.levelController.getMobController().killMob(mob.getId());
+
+            }
 
 //            System.out.println("Mob with ID: " + packet.mobId + " was hit. Now HP is: " + mob.getHp());
 
@@ -228,6 +229,29 @@ public class KryoServer extends Listener {
             // teammate has pressed the "Ready" button.
             broadCastPlayerReadyPacket(packet.playerNickname, packet.isPlayerReady);
             System.out.println(this.playersReady);
+        }
+
+        // Receive this packet if player has collected any spawned loot.
+        if (p instanceof PacketLootCollected) {
+            PacketLootCollected packet = (PacketLootCollected) p;
+
+            if (packet.isLootMedKit) {
+                // If collected loot was a med kit -> heal the player.
+                this.connectedPlayers.get(packet.playerNickname).setHp(MED_KIT_HP_HEAL_AMOUNT);
+            }
+
+            // Remove the hashmap.
+            this.levelController.deleteLoot(packet.collectedLootIndex);
+
+            // Broadcast received packet to everyone except the sender so other players know which loot was collected.
+            for (String playerNickname : connections.keySet()) {
+                if (!playerNickname.equals(packet.playerNickname)) {
+                    Connection connection = connections.get(playerNickname);
+                    connection.sendTCP(packet);
+                }
+            }
+
+            System.out.println("Player" + packet.playerNickname + " has collected loot.");
         }
     }
 
@@ -371,6 +395,19 @@ public class KryoServer extends Listener {
         for (String connectedPlayer : connections.keySet()) {
             Connection connection = connections.get(connectedPlayer);
             connection.sendTCP(packetGameBeginTimer);
+        }
+    }
+
+    public void broadcastPacketLootSpawn(int lootSpawnIndex, int lootType, float spawnCoordinateX, float spawnCoordinateY) {
+        PacketLootSpawn packetLootSpawn = new PacketLootSpawn();
+        packetLootSpawn.spawnPosIndex = lootSpawnIndex;
+        packetLootSpawn.lootType = lootType;
+        packetLootSpawn.spawnCoordinateX = spawnCoordinateX;
+        packetLootSpawn.spawnCoordinateY = spawnCoordinateY;
+
+        for (String connectedPlayer : connections.keySet()) {
+            Connection connection = connections.get(connectedPlayer);
+            connection.sendTCP(packetLootSpawn);
         }
     }
 }
