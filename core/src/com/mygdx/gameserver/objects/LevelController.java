@@ -29,7 +29,7 @@ public class LevelController {
 
         this.mobController = new MobController(this.server);
         this.currentWave = 1;
-        this.isActive = false;  // Use this to manually disable mobs spawn (for testing).
+        this.isActive = true;  // Use this to manually disable mobs spawn (for testing).
 
         // Fill map of loot positions.
         this.lootSpawnPositions.put(0, new float[]{1000f, 1050f});
@@ -128,8 +128,7 @@ public class LevelController {
             this.timerStartTime = System.currentTimeMillis();
             // Generate random loot position index withing known range (0 - 18).
             byte min = 0;
-            byte max = 5;
-//            byte max = 18;
+            byte max = 18;
             int randomLootSpawnIndex = ThreadLocalRandom.current().nextInt(min, max + 1);
 
             if (this.lastLootSpawnPositionIndex != randomLootSpawnIndex
