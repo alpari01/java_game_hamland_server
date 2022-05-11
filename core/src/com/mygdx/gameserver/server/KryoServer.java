@@ -251,7 +251,7 @@ public class KryoServer extends Listener {
                 }
             }
 
-//            System.out.println("Player" + packet.playerNickname + " has collected loot.");
+            System.out.println("Player" + packet.playerNickname + " has collected loot.");
         }
     }
 

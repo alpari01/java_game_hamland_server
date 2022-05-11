@@ -10,8 +10,6 @@ public class LevelController {
 
     private static final int TIME_BETWEEN_NEXT_LOOT_SPAWN = 3; // In seconds.
 
-    public static final float SIZES_CONSTANT = 0.065f;
-
     private KryoServer server;
     private MobController mobController;
     private int currentWave;
@@ -23,6 +21,7 @@ public class LevelController {
 
     private final Map<Integer, float[]> lootSpawnPositions = new HashMap<>();
     private final Map<Integer, Boolean> lootSpawnExistenceOnPosition = new HashMap<>();
+    private int lastLootSpawnPositionIndex;
 
     public LevelController(KryoServer server) {
         this.server = server;
@@ -73,6 +72,8 @@ public class LevelController {
         this.lootSpawnExistenceOnPosition.put(16, false);
         this.lootSpawnExistenceOnPosition.put(17, false);
         this.lootSpawnExistenceOnPosition.put(18, false);
+
+        this.lastLootSpawnPositionIndex = -1;
     }
 
     public void beginNextWave() {
@@ -127,19 +128,20 @@ public class LevelController {
             this.timerStartTime = System.currentTimeMillis();
             // Generate random loot position index withing known range (0 - 18).
             byte min = 0;
+            byte max = 5;
 //            byte max = 18;
-            byte max = 1;
             int randomLootSpawnIndex = ThreadLocalRandom.current().nextInt(min, max + 1);
 
-            if (!this.lootSpawnExistenceOnPosition.get(randomLootSpawnIndex)) {
+            if (this.lastLootSpawnPositionIndex != randomLootSpawnIndex
+                    && !this.lootSpawnExistenceOnPosition.get(randomLootSpawnIndex)) {
                 // If loot on this position was not spawned yet -> spawn it.
+                this.lastLootSpawnPositionIndex = randomLootSpawnIndex;
 
                 // Tick that loot was spawned.
                 this.lootSpawnExistenceOnPosition.put(randomLootSpawnIndex, true);
 
                 // Randomly determine what kind of loot it would be (ammo pack or med kit).
-                int randomLootType = ThreadLocalRandom.current().nextInt(0, 1);
-//                int randomLootType = ThreadLocalRandom.current().nextInt(0, 2);
+                int randomLootType = ThreadLocalRandom.current().nextInt(0, 2);
 
                 // Get the predetermined loot spawn coordinates by spawn index.
                 float lootSpawnCoordinateX = this.lootSpawnPositions.get(randomLootSpawnIndex)[0];
