@@ -104,6 +104,10 @@ public class MobController {
         this.allMobsSpawned.remove(mobId);
     }
 
+    public int getAmountOfDeadPlayers() {
+        return this.deadPlayers.size();
+    }
+
     public void mobsFollowPlayers() {
 
         double gradientX = 0;

@@ -31,6 +31,7 @@ public class KryoServer extends Listener {
 //    private final MobController mobController = new MobController(this);
     private final LevelController levelController = new LevelController(this);
     private static ServerUpdateThread serverUpdateThread;
+    private final Statistics statistics = new Statistics();
 
 
     // Ports to listen on.
@@ -62,6 +63,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketGameBeginTimer.class);
         server.getKryo().register(PacketLootSpawn.class);
         server.getKryo().register(PacketLootCollected.class);
+        server.getKryo().register(PacketSendStatistics.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -87,6 +89,10 @@ public class KryoServer extends Listener {
 //        mobController.mobsFollowPlayers();
         this.levelController.beginNextWave();
         this.levelController.getMobController().mobsFollowPlayers();
+    }
+
+    public int getDeadPlayersAmount() {
+        return this.levelController.getMobController().getAmountOfDeadPlayers();
     }
 
     // Run this method when a client connects.
@@ -207,7 +213,12 @@ public class KryoServer extends Listener {
             // If mob hp is 0 -> remove this mob from the game.
             if (mob.getHp() == 0) {
                 this.levelController.getMobController().killMob(mob.getId());
-
+                // Add points for killing a mob to the respective player.
+                this.statistics.addKillPoints(packet.playerNickname);
+            } else if (mob.getHp() > 0) {
+                // If player has damaged the mob but has not killed it.
+                // Add points for damaging a mob to the respective player.
+                this.statistics.addHitPoints(packet.playerNickname);
             }
 
 //            System.out.println("Mob with ID: " + packet.mobId + " was hit. Now HP is: " + mob.getHp());
@@ -408,6 +419,16 @@ public class KryoServer extends Listener {
         for (String connectedPlayer : connections.keySet()) {
             Connection connection = connections.get(connectedPlayer);
             connection.sendTCP(packetLootSpawn);
+        }
+    }
+
+    public void broadcastPacketSendStatistics() {
+        PacketSendStatistics packetSendStatistics = new PacketSendStatistics();
+        packetSendStatistics.statisticsString = this.statistics.getAllStatisticsAsString();
+
+        for (String connectedPlayer : connections.keySet()) {
+            Connection connection = connections.get(connectedPlayer);
+            connection.sendTCP(packetSendStatistics);
         }
     }
 }
