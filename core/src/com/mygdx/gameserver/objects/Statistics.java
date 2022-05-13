@@ -57,17 +57,4 @@ public class Statistics {
 
         return this.join("\n", statisticsList);
     }
-
-//    public static void main(String[] args) {
-//
-//        Statistics statistics = new Statistics();
-//        statistics.addHitPoints("player111");
-//        statistics.addHitPoints("player111");
-//        statistics.addKillPoints("player111");  // 3 + 2 = 5
-//        statistics.addKillPoints("player2");  // 3
-//        statistics.addKillPoints("player3");
-//        statistics.addKillPoints("player3");  // 3 + 3 = 6
-//
-//        System.out.println(statistics.getAllStatisticsAsString());
-//    }
 }
