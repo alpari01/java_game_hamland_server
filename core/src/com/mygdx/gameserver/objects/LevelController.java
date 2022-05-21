@@ -77,33 +77,36 @@ public class LevelController {
     }
 
     public void beginNextWave() {
-        this.spawnLootRandomly();
-        if (!this.getIsWaveOngoing() && this.isActive) {
-            // If there is no currently ongoing wave.
-            switch (this.currentWave) {
-                // The higher the wave the more difficult it is for players to survive.
-                case 1:
-                    this.mobController.spawnMob("zombie", 2, 500, 500);
-                    break;
 
-                case 2:
-                    this.mobController.spawnMob("blueguy", 4, 300, 800);
-                    break;
+        if (this.isActive) {
+            this.spawnLootRandomly();
+            if (!this.getIsWaveOngoing()) {
+                // If there is no currently ongoing wave.
+                switch (this.currentWave) {
+                    // The higher the wave the more difficult it is for players to survive.
+                    case 1:
+                        this.mobController.spawnMob("zombie", 2, 500, 500);
+                        break;
 
-                case 3:
-                    this.mobController.spawnMob("zombie", 4, 500, 1200);
-                    this.mobController.spawnMob("crab", 2, 300, 800);
-                    break;
+                    case 2:
+                        this.mobController.spawnMob("blueguy", 4, 300, 800);
+                        break;
 
-                case 4:
-                    this.mobController.spawnMob("zombie", 3, 1500, 700);
-                    this.mobController.spawnMob("octopus", 3, 300, 400);
-                    this.currentWave = 1; // FOR WAVE LOOP, REMOVE LATER.
-                    break;
+                    case 3:
+                        this.mobController.spawnMob("zombie", 4, 500, 1200);
+                        this.mobController.spawnMob("crab", 2, 300, 800);
+                        break;
+
+                    case 4:
+                        this.mobController.spawnMob("zombie", 3, 1500, 700);
+                        this.mobController.spawnMob("octopus", 3, 300, 400);
+                        this.currentWave = 1; // FOR WAVE LOOP.
+                        break;
+                }
+
+                // Increment next wave number.
+                this.currentWave++;
             }
-
-            // Increment next wave number.
-            this.currentWave++;
         }
     }
 
@@ -154,5 +157,16 @@ public class LevelController {
 
     public MobController getMobController() {
         return this.mobController;
+    }
+
+    public void reset() {
+        // Reset the loot spawner.
+        this.lastLootSpawnPositionIndex = -1;
+        for (int lootIndex : this.lootSpawnExistenceOnPosition.keySet()) {
+            this.lootSpawnExistenceOnPosition.put(lootIndex, false);
+        }
+
+        // Reset the mob controller.
+        this.mobController.reset();
     }
 }

@@ -208,4 +208,9 @@ public class MobController {
     public Map<Integer, Enemy> getAllMobsSpawned() {
         return this.allMobsSpawned;
     }
+
+    public void reset() {
+        this.allMobsSpawned.clear();
+        this.deadPlayers.clear();
+    }
 }

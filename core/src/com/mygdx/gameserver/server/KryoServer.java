@@ -28,7 +28,6 @@ public class KryoServer extends Listener {
     private Map<String, Boolean> playersReady = new HashMap<>();
 
     // Mobs.
-//    private final MobController mobController = new MobController(this);
     private final LevelController levelController = new LevelController(this);
     private static ServerUpdateThread serverUpdateThread;
     private final Statistics statistics = new Statistics();
@@ -83,6 +82,10 @@ public class KryoServer extends Listener {
 
     public Map<String, Boolean> getPlayersReady() {
         return this.playersReady;
+    }
+
+    public LevelController getLevelController() {
+        return this.levelController;
     }
 
     public void mobsFollowPlayer() {

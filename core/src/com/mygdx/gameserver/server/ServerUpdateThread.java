@@ -75,12 +75,20 @@ public class ServerUpdateThread implements Runnable {
                 this.kryoServer.mobsFollowPlayer();
 
                 if (this.kryoServer.getDeadPlayersAmount() >= this.kryoServer.getConnectedPlayers().size()) {
+                    // If all players are dead.
                     this.startTheGame = false;
                     this.kryoServer.broadcastPacketSendStatistics();
+                    this.kryoServer.getPlayersReady().clear();
+                    this.kryoServer.getLevelController().reset();
                     this.gameOver = true;
                 }
             }
         }
+
+        if (this.gameOver && this.kryoServer.getConnectedPlayers().size() == 0) {
+            this.gameOver = false;
+        }
+        System.out.println(this.kryoServer.getConnectedPlayers());
     }
 
     public boolean checkAllPlayersReady() {
