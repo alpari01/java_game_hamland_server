@@ -63,6 +63,7 @@ public class KryoServer extends Listener {
         server.getKryo().register(PacketLootSpawn.class);
         server.getKryo().register(PacketLootCollected.class);
         server.getKryo().register(PacketSendStatistics.class);
+        server.getKryo().register(PacketGameIsOngoing.class);
 
         // Bind to the ports.
         server.bind(tcpPort, udpPort);
@@ -129,6 +130,7 @@ public class KryoServer extends Listener {
             PacketCheckPlayerNicknameUnique packet = (PacketCheckPlayerNicknameUnique) p;
 
             // Check if this nickname is not already taken by other player.
+            if (serverUpdateThread.isStartTheGame()) respondWithPacketGameIsOngoing(c);
             if (!serverUpdateThread.isStartTheGame() && !connectedPlayers.containsKey(packet.playerNickname)) {
                 addPlayer(packet.playerNickname, c);
                 System.out.println("Client nickname is " + packet.playerNickname);
@@ -319,6 +321,10 @@ public class KryoServer extends Listener {
                 connection.sendTCP(packetPlayerDisconnected);
             }
         }
+    }
+
+    public void respondWithPacketGameIsOngoing(Connection connection) {
+        connection.sendTCP(new PacketGameIsOngoing());
     }
 
     /**
