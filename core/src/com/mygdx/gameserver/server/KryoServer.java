@@ -105,14 +105,6 @@ public class KryoServer extends Listener {
             serverUpdateThread = new ServerUpdateThread();
             serverUpdateThread.setKryoServer(this);
 
-//            mobController.spawnMob("zombie", 1, 1200, 1000);
-//            mobController.spawnMob("octopus", 1, 800, 800);
-//            mobController.spawnMob("crab", 1, 1200, 1200);
-//            mobController.spawnMob("blueguy", 1, 700, 700);
-//            mobController.spawnMob("greenguy", 1, 800, 500);
-
-//            this.levelController.getMobController().spawnMob("zombie", 2, 1200, 1000);
-
             new Thread(serverUpdateThread).start();
             System.out.println("ServerUpdate thread is ON!");
             threadFlag = false;
@@ -137,7 +129,7 @@ public class KryoServer extends Listener {
             PacketCheckPlayerNicknameUnique packet = (PacketCheckPlayerNicknameUnique) p;
 
             // Check if this nickname is not already taken by other player.
-            if (!connectedPlayers.containsKey(packet.playerNickname)) {
+            if (!serverUpdateThread.isStartTheGame() && !connectedPlayers.containsKey(packet.playerNickname)) {
                 addPlayer(packet.playerNickname, c);
                 System.out.println("Client nickname is " + packet.playerNickname);
 
@@ -264,8 +256,6 @@ public class KryoServer extends Listener {
                     connection.sendTCP(packet);
                 }
             }
-
-            System.out.println("Player" + packet.playerNickname + " has collected loot.");
         }
     }
 

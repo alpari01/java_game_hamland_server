@@ -88,7 +88,7 @@ public class ServerUpdateThread implements Runnable {
         if (this.gameOver && this.kryoServer.getConnectedPlayers().size() == 0) {
             this.gameOver = false;
         }
-        System.out.println(this.kryoServer.getConnectedPlayers());
+//        System.out.println(this.kryoServer.getConnectedPlayers());
     }
 
     public boolean checkAllPlayersReady() {
@@ -103,5 +103,9 @@ public class ServerUpdateThread implements Runnable {
         }
         // Else if all players are ready.
         return true;
+    }
+
+    public boolean isStartTheGame() {
+        return this.startTheGame;
     }
 }
