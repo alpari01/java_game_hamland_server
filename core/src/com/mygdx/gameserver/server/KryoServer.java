@@ -131,7 +131,7 @@ public class KryoServer extends Listener {
 
             // Check if this nickname is not already taken by other player.
             if (serverUpdateThread.isStartTheGame()) respondWithPacketGameIsOngoing(c);
-            if (!serverUpdateThread.isStartTheGame() && !connectedPlayers.containsKey(packet.playerNickname)) {
+            else if (!connectedPlayers.containsKey(packet.playerNickname)) {
                 addPlayer(packet.playerNickname, c);
                 System.out.println("Client nickname is " + packet.playerNickname);
 
