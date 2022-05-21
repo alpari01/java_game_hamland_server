@@ -108,4 +108,8 @@ public class ServerUpdateThread implements Runnable {
     public boolean isStartTheGame() {
         return this.startTheGame;
     }
+
+    public boolean isGameOver() {
+        return this.gameOver;
+    }
 }

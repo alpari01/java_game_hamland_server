@@ -36,7 +36,7 @@ public class MobController {
     private static final double BLUEGUY_SPEED = 0.8;
     private static final int BLUEGUY_HP = 1;
     private static final double GREENGUY_SPEED = 0.05;
-    private static final int GREENGUY_HP = 100;
+    private static final int GREENGUY_HP = 35;
 
     private Map<Integer, Enemy> allMobsSpawned = new HashMap<>();
     private Map<String, Player> players;

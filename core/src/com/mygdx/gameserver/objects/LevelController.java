@@ -100,6 +100,36 @@ public class LevelController {
                     case 4:
                         this.mobController.spawnMob("zombie", 3, 1500, 700);
                         this.mobController.spawnMob("octopus", 3, 300, 400);
+                        break;
+
+                    case 5:
+                        this.mobController.spawnMob("crab", 6, 300, 800);
+                        break;
+
+                    case 6:
+                        this.mobController.spawnMob("zombie", 8, 0, 300);
+                        this.mobController.spawnMob("zombie", 4, 500, 1700);
+                        break;
+
+                    case 7:
+                        this.mobController.spawnMob("blueguy", 9, 300, 800);
+                        this.mobController.spawnMob("blueguy", 6, 1300, 0);
+                        break;
+
+                    case 8:
+                        this.mobController.spawnMob("octopus", 5, 300, 400);
+                        this.mobController.spawnMob("zombie", 8, 1500, 700);
+                        break;
+
+                    case 9:
+                        this.mobController.spawnMob("blueguy", 6, 1300, 0);
+                        this.mobController.spawnMob("zombie", 8, 1500, 700);
+                        break;
+
+                    case 10:
+                        this.mobController.spawnMob("crab", 6, 300, 800);
+                        this.mobController.spawnMob("blueguy", 12, 1300, 0);
+                        this.mobController.spawnMob("blueguy", 12, 0, 0);
                         this.currentWave = 1; // FOR WAVE LOOP.
                         break;
                 }
