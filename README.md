@@ -1,3 +1,1 @@
-# iti0301-2022-server
-
-ITI0301-2022 serveri osa
+This repository is a back-end part of the Hamland game project.
